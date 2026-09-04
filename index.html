@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>汽车零部件缺陷检测演示系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #f4f7fa;
+            padding: 30px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            font-size:22px;
+            margin-bottom:30px;
+        }
+        .row{
+            display:flex;
+            gap:24px;
+            margin-bottom:20px;
+        }
+        .box{
+            flex:1;
+            min-height:260px;
+            border:2px dashed #bbbbbb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:10px;
+        }
+        .box img{
+            max-width:100%;
+            max-height:240px;
+        }
+        .control-area{
+            display:flex;
+            gap:12px;
+            justify-content:center;
+            align-items:center;
+            margin-bottom:16px;
+            flex-wrap:wrap;
+        }
+        button,select{
+            padding:10px 22px;
+            font-size:15px;
+            border:none;
+            border-radius:6px;
+            background:#217ad9;
+            color:white;
+            cursor:pointer;
+        }
+        select{
+            background:#ffffff;
+            color:#222222;
+            border:1px solid #999;
+        }
+        .desc{
+            font-size:13px;
+            color:#444;
+            background:#ecf2f9;
+            padding:10px;
+            border-radius:6px;
+        }
+        input[type="file"]{
+            display:none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>基于机器视觉的汽车零部件缺陷检测 — Demo演示界面</h1>
+
+    <div class="row">
+        <div class="box" id="inputBox">请上传零部件图片</div>
+        <div class="box" id="resultBox">点击开始检测</div>
+    </div>
+
+    <div class="control-area">
+        <select id="sampleSel">
+            <option value="">--选择预制缺陷样本--</option>
+            <option value="01">样本1‑钢材划痕</option>
+            <option value="02">样本2‑钢材划痕</option>
+            <option value="03">样本3‑钢材划痕</option>
+            <option value="04">样本4‑钢材划痕</option>
+            <option value="05">样本5‑钢材划痕</option>
+        </select>
+        <button id="uploadBtn">1.上传零部件图片</button>
+        <button id="detectBtn">2.开始缺陷检测</button>
+        <button id="resetBtn">3.重置</button>
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+
+    <div class="desc">
+        说明：本版本为课程设计Demo界面。完整版本需要YOLO模型与后端程序才能实现真正的自动缺陷识别；当前仅用于UI效果展示，支持多组缺陷样本演示。
+    </div>
+</div>
+
+<script>
+    const uploadBtn = document.getElementById('uploadBtn');
+    const detectBtn = document.getElementById('detectBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const fileInput = document.getElementById('fileInput');
+    const sampleSel = document.getElementById('sampleSel');
+
+    const inputBox = document.getElementById('inputBox');
+    const resultBox = document.getElementById('resultBox');
+
+    let originImg = null;
+    let sampleId = '';
+
+    //上传图片
+    uploadBtn.onclick = ()=> fileInput.click();
+    fileInput.onchange = e=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ev=>{
+            originImg = ev.target.result;
+            sampleId = '';
+            inputBox.innerHTML = '';
+            const img = new Image();
+            img.src = originImg;
+            imgBox(img,inputBox);
+            resultBox.innerText = "点击开始检测";
+            sampleSel.value = "";
+        };
+        reader.readAsDataURL(file);
+    };
+
+    //选择预制样本
+    sampleSel.onchange = function(){
+        sampleId = this.value;
+        if(!sampleId){
+            return;
+        }
+        originImg = null;
+        inputBox.innerHTML = '';
+        const img = new Image();
+        img.src = 'data/'+sampleId+'.jpg';
+        imgBox(img,inputBox);
+        resultBox.innerText = "点击开始检测";
+    };
+
+    //检测按钮逻辑
+    detectBtn.onclick = function(){
+        resultBox.innerHTML = '';
+        if(sampleId){
+            //预制样本：左边原图data/xx.jpg；右边带框结果图data/resxx.jpg
+            const img = new Image();
+            img.src = 'data/res'+sampleId+'.jpg';
+            imgBox(img,resultBox);
+        }else if(originImg){
+            //用户自己上传图片，仍然使用result.jpg作为演示结果
+            const img = new Image();
+            img.src = 'result.jpg';
+            imgBox(img,resultBox);
+        }else{
+            alert('请先上传图片或者选择预制样本！');
+        }
+    };
+
+    //重置
+    resetBtn.onclick = function(){
+        originImg = null;
+        sampleId = '';
+        sampleSel.value = '';
+        fileInput.value = '';
+        inputBox.innerText = '请上传零部件图片';
+        resultBox.innerText = '点击开始检测';
+    };
+
+    function imgBox(img,container){
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '240px';
+        container.appendChild(img);
+    }
+</script>
+</body>
+</html>
