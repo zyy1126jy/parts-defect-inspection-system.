@@ -17,12 +17,17 @@
 
 ## 快速启动
 
+**方式一（推荐，一键）**：Windows 双击 `启动检测系统.bat`（或桌面快捷方式），
+服务启动后浏览器自动打开 http://127.0.0.1:8000 ；关闭命令行窗口即停止服务。
+
+**方式二（手动）**：
+
 ```bash
 # 1. 安装依赖
 pip install -r requirements.txt
 
-# 2. 启动后端（前端由后端在 / 路由直接返回）
-python run.py
+# 2. 启动（start.py 会自动打开浏览器；或用 run.py 手动开浏览器）
+python start.py
 
 # 3. 浏览器打开
 #    http://127.0.0.1:8000
@@ -49,7 +54,9 @@ python run.py
 
 ```
 ├── index.html              # 前端
-├── run.py                  # 启动入口
+├── start.py                # 一键启动（自动开浏览器）
+├── run.py                  # 基础启动入口
+├── 启动检测系统.bat         # Windows 双击启动
 ├── requirements.txt
 ├── backend/
 │   ├── app.py              # FastAPI 路由
@@ -61,7 +68,8 @@ python run.py
 │   └── samples/             # 样例图
 ├── prompt/ai_record.json    # AI 对话记录
 ├── tests/test_api.py        # 冒烟测试
-├── 学习笔记.md / 选题说明.md / 方案设计.md / 设计说明书.md
+├── 答辩PPT.pptx
+└── 学习笔记/选题说明/方案设计/设计说明书/需求规格说明书/演示视频脚本 .md
 ```
 
 ## 文档
@@ -69,4 +77,7 @@ python run.py
 - [学习笔记.md](学习笔记.md)
 - [选题说明.md](选题说明.md)
 - [方案设计.md](方案设计.md)
+- [需求规格说明书.md](需求规格说明书.md)
 - [设计说明书.md](设计说明书.md)
+- [演示视频脚本.md](演示视频脚本.md)
+- 答辩PPT.pptx
