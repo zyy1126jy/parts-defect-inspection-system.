@@ -1,11 +1,72 @@
-# parts‑defect‑inspection‑system
-汽车零部件缺陷检测系统
+# 汽车零部件表面缺陷智能检测系统
 
-## 数据准备阶段
-1.数据集来源：Kolektor‑SDD2金属表面缺陷数据集，阿里魔搭社区公开工业缺陷数据集
-数据集下载地址：https://www.modelscope.cn/datasets/OpenDataLab/KolektorSDD2/summary
-说明：数据集图片体积大，原始图像不上传仓库，访问上方链接获取原始数据。
+> 制造智能技术课程设计 · B/S 架构 demo · 基于 NEU 表面缺陷数据库
 
-2.数据预处理：完成图像缩放、灰度转换，编写preprocess.py预处理脚本，输出224*224规格处理后图像。预处理程序存放于 ./data/preprocess.py。已选取少量样本图片完成预处理测试，完整预处理后数据集保存在本地；仓库/data目录存放预处理输出样例。
+## 功能
 
-3.AI工具提示词追溯记录：本项目AI交流记录文件存放于 ./prompt/ai_record.json，后续各阶段将持续更新记录。
+- 上传零件图片，后端自动跑 OpenCV 传统视觉 + 机器学习分类
+- 返回缺陷类别（NEU 6 类）、置信度、缺陷外接框、严重等级
+- SQLite 持久化检测记录
+- 实时看板：合格率、缺陷分布、SPC 单值控制图
+
+## 技术栈
+
+- 后端：FastAPI + SQLite
+- 算法：OpenCV（传统视觉）+ scikit-learn（随机森林）
+- 前端：原生 HTML + ECharts
+
+## 快速启动
+
+```bash
+# 1. 安装依赖
+pip install -r requirements.txt
+
+# 2. 启动后端（前端由后端在 / 路由直接返回）
+python run.py
+
+# 3. 浏览器打开
+#    http://127.0.0.1:8000
+```
+
+## 数据集
+
+- **NEU 东北大学表面缺陷数据库**
+  - 官方：http://faculty.neu.edu.cn/songkechen/zh_CN/zdylm/263270/list/index.htm
+  - Kaggle：https://www.kaggle.com/datasets/kaustubhdikshit/neu-surface-defect-database
+- 6 类 × 300 张 = 1800 张，200×200 灰度 bmp
+- 下载后执行 `python data/preprocess.py --src ./NEU --dst ./data/NEU_proc`
+- 原始图片不入库，详见 [data/README.md](data/README.md)
+
+## 三个技术方向
+
+| 方向 | 文件 | 作用 |
+|---|---|---|
+| 数字图像处理 | `backend/algorithms/traditional_cv.py` | 灰度化/高斯/Otsu/形态学/轮廓提取 |
+| 机器学习分类 | `backend/algorithms/classifier.py` | 几何特征 + 随机森林/规则分类 |
+| 工业大数据 SPC | `backend/algorithms/stats.py` | 合格率、缺陷分布、UCL/CL/LCL |
+
+## 目录
+
+```
+├── index.html              # 前端
+├── run.py                  # 启动入口
+├── requirements.txt
+├── backend/
+│   ├── app.py              # FastAPI 路由
+│   ├── database.py         # SQLite
+│   └── algorithms/        # 三个技术方向 + 训练脚本
+├── data/
+│   ├── README.md           # 数据集说明
+│   ├── preprocess.py        # 预处理
+│   └── samples/             # 样例图
+├── prompt/ai_record.json    # AI 对话记录
+├── tests/test_api.py        # 冒烟测试
+├── 学习笔记.md / 选题说明.md / 方案设计.md / 设计说明书.md
+```
+
+## 文档
+
+- [学习笔记.md](学习笔记.md)
+- [选题说明.md](选题说明.md)
+- [方案设计.md](方案设计.md)
+- [设计说明书.md](设计说明书.md)

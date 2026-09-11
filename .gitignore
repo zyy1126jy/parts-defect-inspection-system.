@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# 数据与模型（体积大，不入库）
+data/NEU/
+data/NEU_proc/
+data/inspection.db
+data/rf_model.json
+
+# 系统
+.DS_Store
+Thumbs.db
+resp.json

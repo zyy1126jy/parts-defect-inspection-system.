@@ -1,4 +1,24 @@
 {
-  "阶段":"数据准备阶段",
-  "操作记录":"本阶段选题说明、方案设计、数据准备文档由AI辅助完成。"
+  "项目": "parts-defect-inspection-system",
+  "对话记录": [
+    {
+      "阶段": "数据准备阶段",
+      "日期": "2026-08-25",
+      "prompt": "帮我写一个汽车零件缺陷检测系统的选题说明和方案设计，用NEU数据集",
+      "产出": "选题说明.md / 方案设计.md",
+      "AI工具": "Trae + DeepSeek-V4"
+    },
+    {
+      "阶段": "系统开发阶段",
+      "日期": "2026-09-10",
+      "prompt": "按任务书要求补全B/S架构：FastAPI后端、SQLite、OpenCV传统视觉、随机森林分类、SPC统计、改造前端调真API",
+      "产出": "backend/、index.html、tests/、设计说明书.md",
+      "AI工具": "Trae + DeepSeek-V4",
+      "纠错记录": [
+        "初版README写的是KolektorSDD2数据集，人工纠正为NEU",
+        "初版前端是纯静态换图，重写为调后端API",
+        "OpenCV中文路径读图失败，改为np.frombuffer+imdecode"
+      ]
+    }
+  ]
 }

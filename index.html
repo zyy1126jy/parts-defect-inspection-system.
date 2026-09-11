@@ -1,192 +1,145 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>汽车零部件缺陷检测演示系统</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft Yahei", sans-serif;
-        }
-        body {
-            background-color: #f4f7fa;
-            padding: 30px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            font-size:22px;
-            margin-bottom:30px;
-        }
-        .row{
-            display:flex;
-            gap:24px;
-            margin-bottom:20px;
-        }
-        .box{
-            flex:1;
-            min-height:260px;
-            border:2px dashed #bbbbbb;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            padding:10px;
-        }
-        .box img{
-            max-width:100%;
-            max-height:240px;
-        }
-        .control-area{
-            display:flex;
-            gap:12px;
-            justify-content:center;
-            align-items:center;
-            margin-bottom:16px;
-            flex-wrap:wrap;
-        }
-        button,select{
-            padding:10px 22px;
-            font-size:15px;
-            border:none;
-            border-radius:6px;
-            background:#217ad9;
-            color:white;
-            cursor:pointer;
-        }
-        select{
-            background:#ffffff;
-            color:#222222;
-            border:1px solid #999;
-        }
-        .desc{
-            font-size:13px;
-            color:#444;
-            background:#ecf2f9;
-            padding:10px;
-            border-radius:6px;
-        }
-        input[type="file"]{
-            display:none;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>汽车零部件表面缺陷检测系统</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",sans-serif}
+  body{background:#f0f4f8;padding:20px}
+  .wrap{max-width:1200px;margin:0 auto}
+  h1{text-align:center;font-size:22px;margin-bottom:18px;color:#222}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .card h3{font-size:15px;margin-bottom:10px;color:#217ad9;border-left:3px solid #217ad9;padding-left:8px}
+  .box{border:2px dashed #bbb;min-height:240px;display:flex;align-items:center;justify-content:center;padding:8px;background:#fafafa}
+  .box img{max-width:100%;max-height:240px}
+  .btns{display:flex;gap:10px;justify-content:center;margin:14px 0;flex-wrap:wrap}
+  button{padding:9px 20px;font-size:14px;border:none;border-radius:6px;background:#217ad9;color:#fff;cursor:pointer}
+  button.ghost{background:#888}
+  button:disabled{background:#aaa;cursor:not-allowed}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{border:1px solid #ddd;padding:5px 6px;text-align:center}
+  th{background:#ecf2f9}
+  .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;color:#fff}
+  .ok{background:#2e9e5b}.warn{background:#e6a23c}.bad{background:#e34d59}
+  #chart1,#chart2{height:260px}
+  .full{grid-column:1/3}
+  .meta{font-size:13px;color:#555;line-height:1.7}
+</style>
 </head>
 <body>
-<div class="container">
-    <h1>基于机器视觉的汽车零部件缺陷检测 — Demo演示界面</h1>
+<div class="wrap">
+  <h1>汽车零部件表面缺陷智能检测系统（NEU 数据集）</h1>
 
-    <div class="row">
-        <div class="box" id="inputBox">请上传零部件图片</div>
-        <div class="box" id="resultBox">点击开始检测</div>
-    </div>
+  <div class="btns">
+    <input type="file" id="fileInput" accept="image/*" hidden>
+    <button id="uploadBtn">1. 上传零件图片</button>
+    <button id="detectBtn" disabled>2. 开始检测</button>
+    <button id="refreshBtn" class="ghost">刷新统计</button>
+  </div>
 
-    <div class="control-area">
-        <select id="sampleSel">
-            <option value="">--选择预制缺陷样本--</option>
-            <option value="01">样本1‑钢材划痕</option>
-            <option value="02">样本2‑钢材划痕</option>
-            <option value="03">样本3‑钢材划痕</option>
-            <option value="04">样本4‑钢材划痕</option>
-            <option value="05">样本5‑钢材划痕</option>
-        </select>
-        <button id="uploadBtn">1.上传零部件图片</button>
-        <button id="detectBtn">2.开始缺陷检测</button>
-        <button id="resetBtn">3.重置</button>
-        <input type="file" id="fileInput" accept="image/*">
+  <div class="grid">
+    <div class="card"><h3>原始图像</h3><div class="box" id="inputBox">请上传图片</div></div>
+    <div class="card"><h3>检测结果（缺陷框）</h3><div class="box" id="resultBox">等待检测</div></div>
+    <div class="card full"><h3>判定信息</h3>
+      <div class="meta" id="meta">尚未检测。</div>
     </div>
-
-    <div class="desc">
-        说明：本版本为课程设计Demo界面。完整版本需要YOLO模型与后端程序才能实现真正的自动缺陷识别；当前仅用于UI效果展示，支持多组缺陷样本演示。
+    <div class="card"><h3>缺陷类型分布</h3><div id="chart1"></div></div>
+    <div class="card"><h3>缺陷面积 SPC 控制图</h3><div id="chart2"></div></div>
+    <div class="card full"><h3>历史检测记录（最近 20 条）</h3>
+      <table><thead><tr>
+        <th>#</th><th>时间</th><th>文件名</th><th>缺陷类别</th>
+        <th>置信度</th><th>等级</th><th>面积占比</th>
+      </tr></thead><tbody id="historyBody"></tbody></table>
     </div>
+  </div>
 </div>
 
 <script>
-    const uploadBtn = document.getElementById('uploadBtn');
-    const detectBtn = document.getElementById('detectBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const fileInput = document.getElementById('fileInput');
-    const sampleSel = document.getElementById('sampleSel');
+const $ = id => document.getElementById(id);
+let fileData = null, fileName = '';
+let chart1 = echarts.init($('chart1')), chart2 = echarts.init($('chart2'));
 
-    const inputBox = document.getElementById('inputBox');
-    const resultBox = document.getElementById('resultBox');
+$('uploadBtn').onclick = () => $('fileInput').click();
+$('fileInput').onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  fileName = f.name; fileData = f;
+  const r = new FileReader();
+  r.onload = ev => {
+    $('inputBox').innerHTML = '';
+    const img = new Image(); img.src = ev.target.result;
+    img.style.maxHeight='240px'; $('inputBox').appendChild(img);
+    $('detectBtn').disabled = false;
+    $('resultBox').innerText = '点击开始检测';
+  };
+  r.readAsDataURL(f);
+};
 
-    let originImg = null;
-    let sampleId = '';
+$('detectBtn').onclick = async () => {
+  if(!fileData) return;
+  $('detectBtn').disabled = true;
+  $('resultBox').innerText = '检测中...';
+  const fd = new FormData(); fd.append('file', fileData);
+  try{
+    const r = await fetch('/api/detect', {method:'POST', body: fd});
+    const d = await r.json();
+    $('resultBox').innerHTML = '';
+    const img = new Image(); img.src = d.vis_image;
+    img.style.maxHeight='240px'; $('resultBox').appendChild(img);
+    const sevCls = d.severity==='良品'?'ok':(d.severity==='严重缺陷'?'bad':'warn');
+    $('meta').innerHTML = `
+      缺陷类别：<b>${d.defect_cn}</b>（${d.defect_class}）　
+      置信度：<b>${(d.confidence*100).toFixed(1)}%</b>　
+      判定等级：<span class="tag ${sevCls}">${d.severity}</span><br>
+      缺陷框数量：${d.bboxes.length}　
+      面积占比：${(d.features.area_ratio*100).toFixed(2)}%　
+      外接矩形长宽比：${d.features.aspect_ratio.toFixed(2)}`;
+    await refreshStats();
+  }catch(err){
+    $('resultBox').innerText = '检测失败：'+err;
+  }finally{
+    $('detectBtn').disabled = false;
+  }
+};
 
-    //上传图片
-    uploadBtn.onclick = ()=> fileInput.click();
-    fileInput.onchange = e=>{
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = ev=>{
-            originImg = ev.target.result;
-            sampleId = '';
-            inputBox.innerHTML = '';
-            const img = new Image();
-            img.src = originImg;
-            imgBox(img,inputBox);
-            resultBox.innerText = "点击开始检测";
-            sampleSel.value = "";
-        };
-        reader.readAsDataURL(file);
-    };
+$('refreshBtn').onclick = refreshStats;
 
-    //选择预制样本
-    sampleSel.onchange = function(){
-        sampleId = this.value;
-        if(!sampleId){
-            return;
-        }
-        originImg = null;
-        inputBox.innerHTML = '';
-        const img = new Image();
-        img.src = 'data/'+sampleId+'.jpg';
-        imgBox(img,inputBox);
-        resultBox.innerText = "点击开始检测";
-    };
-
-    //检测按钮逻辑
-    detectBtn.onclick = function(){
-        resultBox.innerHTML = '';
-        if(sampleId){
-            //预制样本：左边原图data/xx.jpg；右边带框结果图data/resxx.jpg
-            const img = new Image();
-            img.src = 'data/res'+sampleId+'.jpg';
-            imgBox(img,resultBox);
-        }else if(originImg){
-            //用户自己上传图片，仍然使用result.jpg作为演示结果
-            const img = new Image();
-            img.src = 'result.jpg';
-            imgBox(img,resultBox);
-        }else{
-            alert('请先上传图片或者选择预制样本！');
-        }
-    };
-
-    //重置
-    resetBtn.onclick = function(){
-        originImg = null;
-        sampleId = '';
-        sampleSel.value = '';
-        fileInput.value = '';
-        inputBox.innerText = '请上传零部件图片';
-        resultBox.innerText = '点击开始检测';
-    };
-
-    function imgBox(img,container){
-        img.style.maxWidth = '100%';
-        img.style.maxHeight = '240px';
-        container.appendChild(img);
-    }
+async function refreshStats(){
+  const s = await (await fetch('/api/stats')).json();
+  chart1.setOption({
+    tooltip:{},
+    xAxis:{type:'category', data:Object.keys(s.by_class||{})},
+    yAxis:{type:'value'},
+    series:[{type:'bar', data:Object.values(s.by_class||{}),
+      itemStyle:{color:'#217ad9'}}]
+  });
+  const cc = s.control_chart || {};
+  chart2.setOption({
+    tooltip:{},
+    xAxis:{type:'category', data:(cc.points||[]).map((_,i)=>i+1)},
+    yAxis:{type:'value'},
+    series:[
+      {type:'line', data:cc.points||[], name:'面积占比'},
+      {type:'line', data:(cc.points||[]).map(()=>cc.ucl),
+        name:'UCL', lineStyle:{type:'dashed',color:'#e34d59'}, symbol:'none'},
+      {type:'line', data:(cc.points||[]).map(()=>cc.cl),
+        name:'CL', lineStyle:{type:'dashed',color:'#888'}, symbol:'none'},
+      {type:'line', data:(cc.points||[]).map(()=>cc.lcl),
+        name:'LCL', lineStyle:{type:'dashed',color:'#e34d59'}, symbol:'none'},
+    ]
+  });
+  const h = await (await fetch('/api/history?limit=20')).json();
+  $('historyBody').innerHTML = h.map(r=>{
+    const sc = r.severity==='良品'?'ok':(r.severity==='严重缺陷'?'bad':'warn');
+    return `<tr><td>${r.id}</td><td>${r.timestamp}</td><td>${r.image_name||'-'}</td>
+      <td>${r.defect_class}</td><td>${(r.confidence*100).toFixed(1)}%</td>
+      <td><span class="tag ${sc}">${r.severity}</span></td>
+      <td>${((r.defect_area_ratio||0)*100).toFixed(2)}%</td></tr>`;
+  }).join('');
+}
+refreshStats();
+window.onresize = ()=>{chart1.resize();chart2.resize();};
 </script>
 </body>
 </html>
