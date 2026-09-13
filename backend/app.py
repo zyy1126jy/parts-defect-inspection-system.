@@ -15,6 +15,12 @@ ROOT = Path(__file__).resolve().parent.parent
 app = FastAPI(title="汽车零部件表面缺陷检测系统", version="1.0")
 
 
+@app.get("/api/health")
+def health():
+    """健康检查：供 B/S 页面与 C/S 桌面客户端探测服务器是否在线。"""
+    return {"status": "ok", "service": "parts-defect-inspection", "version": "1.0"}
+
+
 @app.get("/", response_class=HTMLResponse)
 def index():
     return (ROOT / "index.html").read_text(encoding="utf-8")
